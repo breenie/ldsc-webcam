@@ -1,0 +1,22 @@
+{
+  "name": "ldsc-webcam",
+  "version": "1.0.0",
+  "description": "The Lake District Ski Club webcam image handler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/breenie/ldsc-webcam.git"
+  },
+  "author": "chris@kurl.co.uk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/breenie/ldsc-webcam/issues"
+  },
+  "homepage": "https://github.com/breenie/ldsc-webcam#readme",
+  "devDependencies": {
+    "serverless": "2.27.1"
+  }
+}

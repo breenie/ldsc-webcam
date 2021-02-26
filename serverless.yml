@@ -1,0 +1,78 @@
+service: ldsc-webcam
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'stage'}
+  region: ${env:AWS_DEFAULT_REGION, 'eu-west-1'}
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - ssm:GetParameters
+          Resource:
+            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:service}/${self:provider.stage}*
+
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:ListBucket"
+#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:PutObject"
+#      Resource:
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add packaging information here
+#package:
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.js
+#    - exclude-me-dir/**
+
+functions:
+  hello:
+    handler: handler.hello
+    environment:
+      TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
+      TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
+      TWITTER_ACCESS_TOKEN_KEY: ${env:TWITTER_ACCESS_TOKEN_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_KEY~false}
+      TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
+    events:
+      - s3:
+          bucket: !Ref WebcamImageBucket
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: "incoming/"
+
+resources:
+  Description: ${self:service} ${self:provider.stage}
+  Resources:
+    WebcamImageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${self:provider.stage}-${AWS::AccountId}
+
+    LambdaWebcamImageBucketPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName: !GetAtt [HelloLambdaFunction, Arn]
+        Principal: "s3.amazonaws.com"
+        Action: "lambda:InvokeFunction"
+        SourceAccount:
+          Ref: AWS::AccountId
+        SourceArn: !GetAtt [WebcamImageBucket, Arn]

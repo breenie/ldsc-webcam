@@ -11,12 +11,17 @@
     "url": "git+https://github.com/breenie/ldsc-webcam.git"
   },
   "author": "chris@kurl.co.uk",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/breenie/ldsc-webcam/issues"
   },
   "homepage": "https://github.com/breenie/ldsc-webcam#readme",
   "devDependencies": {
     "serverless": "2.27.1"
+  },
+  "dependencies": {
+    "aws-sdk": "2.852.0",
+    "serverless-webpack": "5.3.5",
+    "twitter": "1.7.1"
   }
 }

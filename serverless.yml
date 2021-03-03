@@ -1,5 +1,6 @@
 service: ldsc-webcam
 frameworkVersion: "2"
+useDotenv: true
 
 provider:
   name: aws
@@ -11,42 +12,15 @@ provider:
   iam:
     role:
       statements:
-        - Effect: "Allow"
+        - Effect: Allow
           Action:
-            - ssm:GetParameters
+            - s3:GetObject
           Resource:
-            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:service}/${self:provider.stage}*
-
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
+            - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}/incoming*
 
 functions:
-  hello:
-    handler: handler.hello
+  tweet:
+    handler: handler.tweet
     environment:
       TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
       TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
@@ -54,25 +28,13 @@ functions:
       TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
     events:
       - s3:
-          bucket: !Ref WebcamImageBucket
+          bucket: ${self:service}-${self:provider.stage}
           event: s3:ObjectCreated:*
           rules:
             - prefix: "incoming/"
 
 resources:
   Description: ${self:service} ${self:provider.stage}
-  Resources:
-    WebcamImageBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:service}-${self:provider.stage}-${AWS::AccountId}
 
-    LambdaWebcamImageBucketPermission:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        FunctionName: !GetAtt [HelloLambdaFunction, Arn]
-        Principal: "s3.amazonaws.com"
-        Action: "lambda:InvokeFunction"
-        SourceAccount:
-          Ref: AWS::AccountId
-        SourceArn: !GetAtt [WebcamImageBucket, Arn]
+plugins:
+  - serverless-webpack

@@ -19,10 +19,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
-      - name: serverless deploy
-        uses: serverless/github-action@master
-        with:
-          args: deploy --stage=main
+      - run: npx sls deploy --stage=main
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # - name: serverless deploy
+      #   uses: serverless/github-action@master
+      #   with:
+      #     args: deploy --stage=${${{ github.ref }}#ref/heads/}
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

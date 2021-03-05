@@ -2,6 +2,13 @@ service: ldsc-webcam
 frameworkVersion: "2"
 useDotenv: true
 
+custom:
+  env:
+    TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
+    TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
+    TWITTER_ACCESS_TOKEN_KEY: ${env:TWITTER_ACCESS_TOKEN_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_KEY~false}
+    TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -22,10 +29,11 @@ functions:
   tweet:
     handler: handler.tweet
     environment:
-      TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
-      TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
-      TWITTER_ACCESS_TOKEN_KEY: ${env:TWITTER_ACCESS_TOKEN_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_KEY~false}
-      TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
+      TWITTER_CONSUMER_KEY: ${self:custom.env.TWITTER_CONSUMER_KEY}
+      TWITTER_CONSUMER_SECRET: ${self:custom.env.TWITTER_CONSUMER_SECRET}
+      TWITTER_ACCESS_TOKEN_KEY: ${self:custom.env.TWITTER_ACCESS_TOKEN_KEY}
+      TWITTER_ACCESS_TOKEN_SECRET: ${self:custom.env.TWITTER_ACCESS_TOKEN_SECRET}
+
     events:
       - s3:
           bucket: ${self:service}-${self:provider.stage}

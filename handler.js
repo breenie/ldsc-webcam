@@ -1,8 +1,8 @@
 const aws = require("aws-sdk");
-const twitter = require("twitter");
+const Twitter = require("twitter");
 
 const s3 = new aws.S3();
-const twtr = new twitter({
+const twitter = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
   access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
@@ -16,10 +16,10 @@ module.exports.tweet = async ({ Records }) =>
         .getObject({ Bucket, Key })
         .promise()
         .then(({ Body }) =>
-          twtr.post("media/upload", { media_data: Body.toString("base64") })
+          twitter.post("media/upload", { media_data: Body.toString("base64") })
         )
         .then(({ media_id_string }) => media_id_string)
-        .then(media_ids => twtr.post("statuses/update", { media_ids }))
-        .then(({ text }) => `Tweeted ${text}`)
+        .then(media_ids => twitter.post("statuses/update", { media_ids }))
+        .then(({ text }) => console.log(`Tweeted ${text}`))
     )
   ).catch(({ message }) => console.log(message));

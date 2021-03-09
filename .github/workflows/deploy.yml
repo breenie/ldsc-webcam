@@ -10,7 +10,8 @@ jobs:
   deploy:
     name: deploy
     needs: prepare
-    environment: ${{ steps.branch-names.outputs.current_branch }}
+    environment:
+      name: ${{ steps.branch-names.outputs.current_branch }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

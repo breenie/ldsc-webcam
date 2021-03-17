@@ -6,7 +6,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
-  stage: ${opt:stage, 'stage'}
+  stage: ${opt:stage, 'canary'}
   region: ${env:AWS_DEFAULT_REGION, 'eu-west-1'}
 
   iam:
@@ -15,26 +15,57 @@ provider:
         - Effect: Allow
           Action:
             - s3:GetObject
+            - s3:DeleteObject
           Resource:
-            - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}/incoming*
+            - arn:aws:s3:::${self:provider.s3.processed.name}/*
+        - Effect: Allow
+          Action:
+            - s3:GetObjectAcl
+            - s3:GetObject
+            - s3:GetObjectTagging
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:PutObjectTagging
+          Resource:
+            - arn:aws:s3:::${self:provider.s3.archived.name}/*
+
+  s3:
+    source:
+      name: ${self:service}-${self:provider.stage}-source
+    processed:
+      name: ${self:service}-${self:provider.stage}-processed
+    archived:
+      name: ${self:service}-${self:provider.stage}-archived
+    failed:
+      name: ${self:service}-${self:provider.stage}-failed
 
 functions:
-  tweet:
-    handler: handler.tweet
+  processed:
     environment:
       TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
       TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
       TWITTER_ACCESS_TOKEN_KEY: ${env:TWITTER_ACCESS_TOKEN_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_KEY~false}
       TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
+      ARCHIVED_BUCKET: ${self:provider.s3.archived.name}
     events:
       - s3:
-          bucket: ${self:service}-${self:provider.stage}
+          bucket: processed
           event: s3:ObjectCreated:*
-          rules:
-            - prefix: "incoming/"
+    handler: src/handlers/processed.handler
 
 resources:
   Description: ${self:service} ${self:provider.stage}
+  Resources:
+    S3BucketArchived:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.s3.archived.name}
+        AccessControl: PublicRead
+
+    S3BucketFailed:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.s3.failed.name}
 
 plugins:
   - serverless-webpack

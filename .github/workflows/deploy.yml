@@ -1,9 +1,10 @@
-name: Deploy main branch
+name: Deploy application
 
 on:
   push:
     branches:
       - main
+      - canary
 
 jobs:
   deploy:
@@ -14,6 +15,9 @@ jobs:
         node-version: [12.x]
     steps:
       - uses: actions/checkout@v2
+      - name: Get current branch name
+        id: branch-names
+        uses: tj-actions/branch-names@v2.2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -22,7 +26,7 @@ jobs:
       - name: serverless deploy
         uses: serverless/github-action@master
         with:
-          args: deploy --stage=main
+          args: deploy --stage=${{ steps.branch-names.outputs.current_branch }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -42,7 +42,7 @@ functions:
     environment:
       PROCESSED_BUCKET: ${self:provider.s3.processed.name}
       FAILED_BUCKET: ${self:provider.s3.failed.name}
-      MEAN_THRESHOLD: 5000
+      MEAN_THRESHOLD: 18500
     events:
       - s3:
           bucket: source

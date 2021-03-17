@@ -41,6 +41,6 @@ module.exports.handler = async ({ Records }) =>
             ACL: "public-read"
           })
         )
-        .catch(e => console.log(e))
+        .catch(console.log)
     )
-  ).catch(({ message }) => console.log(message));
+  ).catch(console.log);

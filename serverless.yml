@@ -14,20 +14,18 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - s3:GetObject
-            - s3:DeleteObject
-          Resource:
-            - arn:aws:s3:::${self:provider.s3.processed.name}/*
-        - Effect: Allow
-          Action:
             - s3:GetObjectAcl
             - s3:GetObject
             - s3:GetObjectTagging
+            - s3:DeleteObject
             - s3:PutObject
             - s3:PutObjectAcl
             - s3:PutObjectTagging
           Resource:
             - arn:aws:s3:::${self:provider.s3.archived.name}/*
+            - arn:aws:s3:::${self:provider.s3.failed.name}/*
+            - arn:aws:s3:::${self:provider.s3.processed.name}/*
+            - arn:aws:s3:::${self:provider.s3.source.name}/*
 
   s3:
     source:
@@ -40,6 +38,19 @@ provider:
       name: ${self:service}-${self:provider.stage}-failed
 
 functions:
+  source:
+    environment:
+      PROCESSED_BUCKET: ${self:provider.s3.processed.name}
+      FAILED_BUCKET: ${self:provider.s3.failed.name}
+      MEAN_THRESHOLD: 18500
+    events:
+      - s3:
+          bucket: source
+          event: s3:ObjectCreated:*
+    handler: src/handlers/source.handler
+    layers:
+      - arn:aws:lambda:eu-west-1:162910861850:layer:image-magick:1
+
   processed:
     environment:
       TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}

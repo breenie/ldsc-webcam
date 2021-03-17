@@ -9,6 +9,22 @@ provider:
   stage: ${opt:stage, 'canary'}
   region: ${env:AWS_DEFAULT_REGION, 'eu-west-1'}
 
+ iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::${self:provider.s3.processed.name}/*
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+          Resource:
+            - arn:aws:s3:::${self:provider.s3.archived.name}/*
+
   s3:
     source:
       name: ${self:service}-${self:provider.stage}-source
@@ -32,7 +48,6 @@ functions:
           bucket: processed
           event: s3:ObjectCreated:*
     handler: src/handlers/processed.handler
-    role: ProcessedLambdaRole
 
 resources:
   Description: ${self:service} ${self:provider.stage}
@@ -47,36 +62,6 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.s3.failed.name}
-
-    ProcessedLambdaRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: ${self:service}-${self:provider.stage}-role-processed
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: S3 policy
-            PolicyDocument:
-              Version: 2012-10-17
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - s3:GetObject
-                    - s3:DeleteObject
-                  Resource:
-                    - arn:aws:s3:::${self:provider.s3.processed.name}/*
-                - Effect: Allow
-                  Action:
-                    - s3:PutObject
-                    - s3:PutObjectAcl
-                  Resource:
-                    - arn:aws:s3:::${self:provider.s3.archived.name}/*
 
 plugins:
   - serverless-webpack

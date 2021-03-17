@@ -61,7 +61,8 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyDocument:
+          - PolicyName: S3 policy
+            PolicyDocument:
               Version: 2012-10-17
               Statement:
                 - Effect: Allow

@@ -11,12 +11,13 @@ module.exports = {
       .then(({ Body }) => Body),
 
   //Moves an onject from SourceBucket to TargetBucket, essentialy a copy delete.
-  move: ({ TargetBucket, Key, SourceBucket }) =>
+  move: ({ TargetBucket, Key, SourceBucket, ...args }) =>
     s3
       .copyObject({
         CopySource: `/${SourceBucket}/${Key}`,
         Bucket: TargetBucket,
-        Key
+        Key,
+        ...args
       })
       .promise()
       .then(() => s3.deleteObject({ Key, Bucket: SourceBucket }).promise())

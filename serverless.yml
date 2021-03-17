@@ -9,32 +9,73 @@ provider:
   stage: ${opt:stage, 'canary'}
   region: ${env:AWS_DEFAULT_REGION, 'eu-west-1'}
 
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - s3:GetObject
-          Resource:
-            - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}/incoming*
+  s3:
+    source:
+      name: ${self:service}-${self:provider.stage}-source
+    processed:
+      name: ${self:service}-${self:provider.stage}-processed
+    archived:
+      name: ${self:service}-${self:provider.stage}-archived
+    failed:
+      name: ${self:service}-${self:provider.stage}-failed
 
 functions:
-  tweet:
-    handler: handler.tweet
+  processed:
     environment:
       TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_KEY~false}
       TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_CONSUMER_SECRET~false}
       TWITTER_ACCESS_TOKEN_KEY: ${env:TWITTER_ACCESS_TOKEN_KEY, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_KEY~false}
       TWITTER_ACCESS_TOKEN_SECRET: ${env:TWITTER_ACCESS_TOKEN_SECRET, ssm:/${self:service}/${self:provider.stage}/TWITTER_ACCESS_TOKEN_SECRET~false}
+      ARCHIVED_BUCKET: ${self:provider.s3.archived.name}
     events:
       - s3:
-          bucket: ${self:service}-${self:provider.stage}
+          bucket: processed
           event: s3:ObjectCreated:*
-          rules:
-            - prefix: "incoming/"
+    handler: src/handlers/processed.handler
+    role: ProcessedLambdaRole
 
 resources:
   Description: ${self:service} ${self:provider.stage}
+  Resources:
+    S3BucketArchived:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.s3.archived.name}
+        AccessControl: PublicRead
+
+    S3BucketFailed:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.s3.failed.name}
+
+    ProcessedLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-${self:provider.stage}-role-processed
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:GetObject
+                    - s3:DeleteObject
+                  Resource:
+                    - arn:aws:s3:::${self:provider.s3.processed.name}/*
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:PutObjectAcl
+                  Resource:
+                    - arn:aws:s3:::${self:provider.s3.archived.name}/*
 
 plugins:
   - serverless-webpack

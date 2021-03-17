@@ -20,8 +20,12 @@ provider:
             - arn:aws:s3:::${self:provider.s3.processed.name}/*
         - Effect: Allow
           Action:
+            - s3:GetObjectAcl
+            - s3:GetObject
+            - s3:GetObjectTagging
             - s3:PutObject
             - s3:PutObjectAcl
+            - s3:PutObjectTagging
           Resource:
             - arn:aws:s3:::${self:provider.s3.archived.name}/*
 

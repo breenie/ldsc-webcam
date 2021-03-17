@@ -27,7 +27,8 @@ module.exports.handler = async ({ Records }) =>
           s3.move({
             TargetBucket: process.env["ARCHIVED_BUCKET"],
             Key,
-            SourceBucket: Bucket
+            SourceBucket: Bucket,
+            ACL: "public-read"
           })
         )
         // The new "moved" Bucket and Key are returned. Not sure if I like that or not.

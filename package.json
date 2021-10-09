@@ -21,7 +21,9 @@
   },
   "dependencies": {
     "aws-sdk": "2.852.0",
+    "date-format": "3.0.0",
     "gm": "1.23.1",
+    "mailparser": "3.3.3",
     "serverless-webpack": "5.3.5",
     "spawn-sync": "2.0.0",
     "twitter": "1.7.1",

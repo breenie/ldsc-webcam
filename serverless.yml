@@ -42,6 +42,8 @@ provider:
 
 functions:
   email:
+    environment:
+      SOURCE_BUCKET: ${self:provider.s3.source.name}
     events:
       - s3:
           bucket: email

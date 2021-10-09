@@ -23,11 +23,14 @@ provider:
             - s3:PutObjectTagging
           Resource:
             - arn:aws:s3:::${self:provider.s3.archived.name}/*
+            - arn:aws:s3:::${self:provider.s3.email.name}/*
             - arn:aws:s3:::${self:provider.s3.failed.name}/*
             - arn:aws:s3:::${self:provider.s3.processed.name}/*
             - arn:aws:s3:::${self:provider.s3.source.name}/*
 
   s3:
+    email:
+      name: ${self:service}-${self:provider.stage}-email
     source:
       name: ${self:service}-${self:provider.stage}-source
     processed:
@@ -38,6 +41,13 @@ provider:
       name: ${self:service}-${self:provider.stage}-failed
 
 functions:
+  email:
+    events:
+      - s3:
+          bucket: email
+          event: s3:ObjectCreated:*
+    handler: src/handlers/email.handler
+
   source:
     environment:
       PROCESSED_BUCKET: ${self:provider.s3.processed.name}
@@ -77,6 +87,23 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.s3.failed.name}
+
+    EmailBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: ${self:provider.s3.email.name}
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: AllowSESPuts
+              Effect: Allow
+              Principal:
+                Service: ses.amazonaws.com
+              Action: s3:PutObject
+              Resource: arn:aws:s3:::${self:provider.s3.email.name}/*
+              Condition:
+                StringEquals:
+                  "aws:Referer": !Sub ${AWS::AccountId}
 
 plugins:
   - serverless-webpack

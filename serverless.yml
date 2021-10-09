@@ -107,5 +107,20 @@ resources:
                 StringEquals:
                   "aws:Referer": !Sub ${AWS::AccountId}
 
+    EmailLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
+
+    SourceLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
+
+    ProcessedLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
+
 plugins:
   - serverless-webpack

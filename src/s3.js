@@ -24,5 +24,9 @@ module.exports = {
       .then(() => ({ Key, Bucket: TargetBucket })),
 
   // Proxy the native copyObject({CopySource, Bucket, Key})
-  copy: args => s3.copyObject(args).promise()
+  copy: (args) => s3.copyObject(args).promise(),
+
+  // args can contain ACL etc
+  put: ({ Body, Bucket, Key, ...args }) =>
+    s3.putObject({ Body, Bucket, Key, ...args }).promise()
 };

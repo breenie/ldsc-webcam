@@ -42,6 +42,8 @@ provider:
 
 functions:
   email:
+    environment:
+      SOURCE_BUCKET: ${self:provider.s3.source.name}
     events:
       - s3:
           bucket: email
@@ -104,6 +106,21 @@ resources:
               Condition:
                 StringEquals:
                   "aws:Referer": !Sub ${AWS::AccountId}
+
+    EmailLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
+
+    SourceLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
+
+    ProcessedLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: "7"
 
 plugins:
   - serverless-webpack

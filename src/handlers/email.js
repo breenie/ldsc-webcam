@@ -26,7 +26,7 @@ module.exports.handler = async ({ Records }) =>
               )
             )
           )
-          .then(([at]) => at)
+          .then(([attachment]) => attachment)
           .then(({ content: Body }) =>
             s3.put({
               Body,

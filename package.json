@@ -26,7 +26,8 @@
     "date-format": "3.0.0",
     "gm": "1.23.1",
     "mailparser": "3.3.3",
+    "mime": "3.0.0",
     "spawn-sync": "2.0.0",
-    "twitter": "1.7.1"
+    "twitter-api-v2": "1.15.1"
   }
 }

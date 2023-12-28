@@ -4,8 +4,5 @@ module.exports = {
   // output: set by the plugin
   mode: "production",
   target: "node",
-  entry: slsw.lib.entries,
-  externals: [
-    /aws-sdk/, // Available on AWS Lambda
-  ],
+  entry: slsw.lib.entries
 };

@@ -16,11 +16,6 @@
     "url": "https://github.com/breenie/ldsc-webcam/issues"
   },
   "homepage": "https://github.com/breenie/ldsc-webcam#readme",
-  "devDependencies": {
-    "serverless": "2.72.3",
-    "serverless-webpack": "5.10.0",
-    "webpack": "5.74.0"
-  },
   "dependencies": {
     "aws-sdk": "2.852.0",
     "date-format": "3.0.0",
@@ -29,5 +24,10 @@
     "mime": "3.0.0",
     "spawn-sync": "2.0.0",
     "twitter-api-v2": "1.15.1"
+  },
+  "devDependencies": {
+    "serverless": "3.38.0",
+    "serverless-webpack": "5.13.0",
+    "webpack": "5.89.0"
   }
 }

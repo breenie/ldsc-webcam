@@ -93,6 +93,17 @@ resources:
       Properties:
         BucketName: ${self:provider.s3.failed.name}
 
+    S3BucketEmail:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.s3.email.name}
+        LifecycleConfiguration:
+          Rules:
+            - Id: ExpireOldObjects
+              Status: Enabled
+              ExpirationInDays: 30
+              Prefix: ""
+
     EmailBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:

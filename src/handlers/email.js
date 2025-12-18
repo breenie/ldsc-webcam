@@ -31,7 +31,8 @@ module.exports.handler = async ({ Records }) =>
             s3.put({
               Body,
               Bucket: process.env["SOURCE_BUCKET"],
-              Key: `ldscwebcam__${now()}GMT.jpg`
+              Key: `ldscwebcam__${now()}GMT.jpg`,
+              ContentType: "image/jpeg"
             })
           )
           .catch((err) => console.error(err))

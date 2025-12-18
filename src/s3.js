@@ -17,6 +17,7 @@ module.exports = {
         CopySource: `/${SourceBucket}/${Key}`,
         Bucket: TargetBucket,
         Key,
+        MetadataDirective: "COPY",
         ...args
       })
       .promise()
@@ -24,7 +25,8 @@ module.exports = {
       .then(() => ({ Key, Bucket: TargetBucket })),
 
   // Proxy the native copyObject({CopySource, Bucket, Key})
-  copy: (args) => s3.copyObject(args).promise(),
+  copy: (args) =>
+    s3.copyObject({ MetadataDirective: "COPY", ...args }).promise(),
 
   // args can contain ACL etc
   put: ({ Body, Bucket, Key, ...args }) =>

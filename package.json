@@ -1,6 +1,6 @@
 {
   "name": "ldsc-webcam",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The Lake District Ski Club webcam image handler",
   "main": "index.js",
   "scripts": {
